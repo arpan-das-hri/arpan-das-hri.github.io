@@ -87,6 +87,18 @@
         font-size: 1.3rem;
       }
     }
+    .arxiv-link {
+  font-size: 0.85rem;       /* Slightly smaller than main text */
+  color: #aaa;              /* Light gray color */
+  margin-left: 8px;         /* Space between title and [arXiv] */
+  text-decoration: none;    /* Remove underline by default */
+}
+
+.arxiv-link:hover {
+  color: #1e90ff;           /* Turns blue when hovered */
+  text-decoration: underline; /* Adds underline on hover */
+}
+
   </style>
 </head>
 <body>
@@ -102,6 +114,7 @@
       <a href="restriction_paskunas_sl2.pdf" target="_blank">
         A restriction problem for mod <i>p</i> representations of SL<sub>2</sub>(F)
       </a>
+      <a href="https://arxiv.org/abs/2412.11751v1" target="_blank" class="arxiv-link">[arXiv]</a>
     </li>
   </ul>
 </div>
@@ -116,4 +129,5 @@
   <footer>Project maintained by arpan-das-hri</footer>
 </body>
 </html>
+
 
