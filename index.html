@@ -46,10 +46,11 @@
 
     /* ---------- Background: Bruhat–Tits tree of SL2(Q_2) ---------- */
     #tree {
-      position: fixed;
-      inset: 0;
+      position: absolute;   /* scrolls away with the top of the page */
+      top: 0;
+      left: 0;
       width: 100%;
-      height: 100%;
+      height: 100vh;
       z-index: 0;
       pointer-events: none;
       opacity: 1;
@@ -315,6 +316,14 @@
       font-size: 0.82rem;
       color: var(--faint);
     }
+    footer .bg-note {
+      max-width: 620px;
+      margin: 0 auto 1rem;
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
     footer .qed {
       display: inline-block;
       width: 0.6em;
@@ -507,6 +516,11 @@
   </div>
 
   <footer>
+    <p class="bg-note">
+      Background: the star of a vertex in the Bruhat&ndash;Tits building of SL<sub>3</sub>(&#8474;<sub>2</sub>).
+      Its link is the Heawood graph &mdash; the incidence graph of the Fano plane &#8473;<sup>2</sup>(&#120125;<sub>2</sub>) &mdash;
+      and each highlighted hexagon is the trace of an apartment.
+    </p>
     Project maintained by arpan-das-hri<span class="qed" title="∎"></span>
   </footer>
 
@@ -526,32 +540,67 @@
       els.forEach(function (e) { io.observe(e); });
     })();
 
-    /* Background: a slowly rotating Bruhat–Tits tree of SL2(Q_2) (the 3-regular tree) */
+    /* Background: the star of a vertex in the Bruhat–Tits building of SL3(Q_2).
+       Vertices adjacent to the lattice class [L] are the subspaces of L/2L = F_2^3:
+       7 points (type 1) and 7 lines (type 2) of the Fano plane. Chambers containing [L]
+       are flags (point ⊂ line), so the link is the Heawood graph (21 edges).
+       Apartments through [L] are frames: 3 non-collinear points + the 3 lines joining them,
+       a hexagon in the link. One apartment at a time is highlighted. */
     (function () {
       var c = document.getElementById('tree');
       var ctx = c.getContext('2d');
-      var P = 2;            // residue field F_p, so the tree is (p+1)-regular
-      var DEPTH = 7;
-      var reduce = false; // always rotate (very slowly)
-      var edges = [], W, H, dpr;
+      var W, H, dpr;
 
-      function build() {
-        edges = [];
-        // root has p+1 neighbours, every other vertex has p children
-        function grow(x, y, ang, spread, len, d) {
-          if (d > DEPTH) return;
-          var k = (d === 1) ? P + 1 : P;
-          for (var i = 0; i < k; i++) {
-            var a = (d === 1)
-              ? ang + (2 * Math.PI * i) / k
-              : ang + spread * ((i + 0.5) / k - 0.5);
-            var nx = x + len * Math.cos(a), ny = y + len * Math.sin(a);
-            edges.push([x, y, nx, ny, d]);
-            grow(nx, ny, a, (d === 1 ? 2 * Math.PI / (P + 1) : spread) * 0.92, len * 0.72, d + 1);
-          }
-        }
-        grow(0, 0, -Math.PI / 2, 0, 1, 1);
+      function dot(a, b) { var x = a & b; return ((x >> 2) ^ (x >> 1) ^ x) & 1; }
+
+      // vertex 0 = centre; 1..7 = points; 8..14 = lines
+      var type = [0], i, j, k;
+      for (i = 1; i <= 7; i++) type.push(1);
+      for (i = 1; i <= 7; i++) type.push(2);
+
+      var link = [];
+      for (i = 1; i <= 7; i++) for (j = 1; j <= 7; j++) if (dot(i, j) === 0) link.push([i, 7 + j]);
+      var chambers = link.map(function (e) { return [0, e[0], e[1]]; });
+
+      function lineThrough(a, b) {
+        for (var l = 1; l <= 7; l++) if (!dot(a, l) && !dot(b, l)) return 7 + l;
       }
+      function key(a, b) { return a < b ? a + '-' + b : b + '-' + a; }
+
+      var apartments = [];
+      for (i = 1; i <= 7; i++) for (j = i + 1; j <= 7; j++) for (k = j + 1; k <= 7; k++) {
+        if ((i ^ j ^ k) === 0) continue;               // collinear
+        var cyc = [i, lineThrough(i, j), j, lineThrough(j, k), k, lineThrough(k, i)];
+        var edges = {};
+        for (var m = 0; m < 6; m++) edges[key(cyc[m], cyc[(m + 1) % 6])] = 1;
+        apartments.push(edges);                        // 28 apartments through the vertex
+      }
+
+      // Lay the 14 link vertices out on a sphere (springs along Heawood edges, mutual repulsion)
+      var P = [[0, 0, 0]], n = 14;
+      for (i = 0; i < n; i++) {
+        var y = 1 - 2 * (i + 0.5) / n, r = Math.sqrt(1 - y * y), th = i * 2.399963;
+        P.push([r * Math.cos(th), y, r * Math.sin(th)]);
+      }
+      var adj = {};
+      link.forEach(function (e) { adj[key(e[0], e[1])] = 1; });
+      for (var it = 0; it < 600; it++) {
+        for (i = 1; i <= n; i++) {
+          var f = [0, 0, 0];
+          for (j = 1; j <= n; j++) {
+            if (i === j) continue;
+            var d = [P[i][0] - P[j][0], P[i][1] - P[j][1], P[i][2] - P[j][2]];
+            var dd = Math.sqrt(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]) + 1e-6;
+            var s = 0.02 / (dd * dd * dd) - (adj[key(i, j)] ? 0.05 : 0);
+            f[0] += s * d[0]; f[1] += s * d[1]; f[2] += s * d[2];
+          }
+          for (k = 0; k < 3; k++) P[i][k] += f[k];
+          var nr = Math.hypot(P[i][0], P[i][1], P[i][2]);
+          for (k = 0; k < 3; k++) P[i][k] /= nr;
+        }
+      }
+
+      var colour = ['217,178,111', '127,179,213', '232,230,225'];   // vertex types 0, 1, 2
 
       function resize() {
         dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -560,31 +609,64 @@
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       }
 
+      var PERIOD = 4500;
       function draw(t) {
         ctx.clearRect(0, 0, W, H);
-        var R = Math.min(W, H) * 0.34;
-        var cx = W * 0.82, cy = H * 0.30;
-        var rot = t * 0.0001;   // one full turn ≈ 1 minute
-        var cs = Math.cos(rot), sn = Math.sin(rot);
-        ctx.lineCap = 'round';
-        for (var i = 0; i < edges.length; i++) {
-          var e = edges[i];
-          var x1 = cx + R * (e[0] * cs - e[1] * sn), y1 = cy + R * (e[0] * sn + e[1] * cs);
-          var x2 = cx + R * (e[2] * cs - e[3] * sn), y2 = cy + R * (e[2] * sn + e[3] * cs);
-          var alpha = 0.6 * Math.pow(0.85, e[4] - 1);
-          ctx.strokeStyle = 'rgba(217,178,111,' + alpha + ')';
-          ctx.lineWidth = Math.max(0.4, 1.4 * Math.pow(0.82, e[4] - 1));
-          ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
-          ctx.fillStyle = 'rgba(232,230,225,' + (alpha * 1.4) + ')';
-          ctx.beginPath(); ctx.arc(x2, y2, Math.max(0.6, 2.2 * Math.pow(0.8, e[4] - 1)), 0, 6.283); ctx.fill();
+        var narrow = W < 820;
+        var R = Math.min(W, H) * (narrow ? 0.30 : 0.26);
+        var cx = W * (narrow ? 0.72 : 0.84), cy = H * (narrow ? 0.18 : 0.34);
+
+        var a = t * 0.00012, tilt = 0.45;
+        var ca = Math.cos(a), sa = Math.sin(a), ct = Math.cos(tilt), st = Math.sin(tilt);
+        var Q = P.map(function (p) {
+          var x = p[0] * ca + p[2] * sa, z = -p[0] * sa + p[2] * ca, y = p[1];
+          var y2 = y * ct - z * st, z2 = y * st + z * ct;
+          var s = 3.2 / (3.2 + z2);
+          return [cx + R * x * s, cy + R * y2 * s, z2];
+        });
+
+        // current apartment and its fade weight
+        var idx = Math.floor(t / PERIOD), ph = (t % PERIOD) / PERIOD;
+        var ap = apartments[(idx * 11) % apartments.length];
+        var w = Math.min(1, Math.min(ph, 1 - ph) * 5);
+
+        // chambers, back to front
+        var order = chambers.slice().sort(function (A, B) {
+          return (Q[B[1]][2] + Q[B[2]][2]) - (Q[A[1]][2] + Q[A[2]][2]);
+        });
+        order.forEach(function (ch) {
+          var inAp = ap[key(ch[1], ch[2])];
+          var depth = 0.6 + 0.4 * (1 - (Q[ch[1]][2] + Q[ch[2]][2] + 2) / 4);
+          ctx.beginPath();
+          ctx.moveTo(Q[0][0], Q[0][1]); ctx.lineTo(Q[ch[1]][0], Q[ch[1]][1]); ctx.lineTo(Q[ch[2]][0], Q[ch[2]][1]);
+          ctx.closePath();
+          ctx.fillStyle = 'rgba(217,178,111,' + ((0.045 + (inAp ? 0.15 * w : 0)) * depth) + ')';
+          ctx.fill();
+          ctx.lineWidth = inAp ? 0.8 + 0.8 * w : 0.7;
+          ctx.strokeStyle = 'rgba(217,178,111,' + ((0.28 + (inAp ? 0.4 * w : 0)) * depth) + ')';
+          ctx.stroke();
+        });
+
+        // vertices, coloured by type
+        for (i = 0; i <= n; i++) {
+          var q = Q[i], al = 0.45 + 0.45 * (1 - (q[2] + 1) / 2);
+          ctx.fillStyle = 'rgba(' + colour[type[i]] + ',' + al + ')';
+          ctx.beginPath(); ctx.arc(q[0], q[1], i === 0 ? 3.5 : 2.6, 0, 6.283); ctx.fill();
         }
-        ctx.fillStyle = 'rgba(217,178,111,0.6)';
-        ctx.beginPath(); ctx.arc(cx, cy, 3, 0, 6.283); ctx.fill();
-        if (!reduce) requestAnimationFrame(draw);
+        if (visible) requestAnimationFrame(draw);
       }
 
-      build(); resize();
-      window.addEventListener('resize', function () { resize(); if (reduce) draw(0); });
+      var visible = true;
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(function (en) {
+          var was = visible;
+          visible = en[0].isIntersecting;
+          if (visible && !was) requestAnimationFrame(draw);
+        }).observe(c);
+      }
+
+      resize();
+      window.addEventListener('resize', resize);
       requestAnimationFrame(draw);
     })();
   </script>
