@@ -13,13 +13,14 @@
 
   <style>
     :root {
-      --bg: #07090d;
-      --bg-2: #0d1118;
-      --card: rgba(255, 255, 255, 0.035);
-      --border: rgba(255, 255, 255, 0.08);
-      --text: #e8e6e1;
-      --muted: #9aa0a8;
-      --faint: #5d636c;
+      /* "old library": espresso-black, cream text, brass accents */
+      --bg: #15110d;
+      --bg-2: #1a140f;
+      --card: rgba(236, 228, 214, 0.04);
+      --border: rgba(236, 228, 214, 0.09);
+      --text: #ece4d6;
+      --muted: #a99f8f;
+      --faint: #6f6658;
       --accent: #d9b26f;      /* warm brass */
       --accent-2: #7fb3d5;    /* steel blue */
       --serif: "EB Garamond", Georgia, "Times New Roman", serif;
@@ -32,9 +33,13 @@
     body {
       margin: 0;
       background:
-        radial-gradient(1200px 600px at 85% -10%, rgba(127, 179, 213, 0.10), transparent 60%),
-        radial-gradient(900px 500px at -10% 30%, rgba(217, 178, 111, 0.07), transparent 60%),
-        var(--bg);
+        /* faint paper grain */
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .06 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"),
+        /* brass glow at the top right, warm umber on the left */
+        radial-gradient(1100px 650px at 85% -10%, rgba(217, 178, 111, 0.12), transparent 60%),
+        radial-gradient(900px 600px at -10% 50%, rgba(140, 90, 50, 0.10), transparent 60%),
+        linear-gradient(180deg, var(--bg-2) 0%, #120e0b 100%);
+      background-color: var(--bg);
       color: var(--text);
       font-family: var(--sans);
       font-weight: 400;
@@ -44,22 +49,10 @@
 
     a { color: inherit; }
 
-    /* ---------- Background: Bruhat–Tits tree of SL2(Q_2) ---------- */
-    #tree {
-      position: absolute;   /* scrolls away with the top of the page */
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100vh;
-      z-index: 0;
-      pointer-events: none;
-      opacity: 1;
-    }
-
     .page {
       position: relative;
       z-index: 1;
-      max-width: 980px;
+      max-width: 1140px;
       margin: 0 auto;
       padding: 0 1.5rem;
     }
@@ -97,10 +90,29 @@
     /* ---------- Hero ---------- */
     .hero {
       display: grid;
-      grid-template-columns: 300px 1fr;
-      gap: 3.5rem;
+      grid-template-columns: 260px minmax(0, 1fr) 300px;
+      gap: 2.75rem;
       align-items: center;
-      padding: 3.5rem 0 4rem;
+      padding: 3rem 0 4rem;
+    }
+
+    /* ---------- The building (third column of the header) ---------- */
+    figure.building {
+      margin: 0;
+      text-align: center;
+    }
+    figure.building canvas {
+      display: block;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+    }
+    figure.building figcaption {
+      margin-top: 0.6rem;
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 0.9rem;
+      line-height: 1.45;
+      color: var(--muted);
     }
 
     figure.portrait {
@@ -134,7 +146,7 @@
       content: "";
       position: absolute;
       inset: 0;
-      background: linear-gradient(to top, rgba(7, 9, 13, 0.55), transparent 40%);
+      background: linear-gradient(to top, rgba(18, 14, 11, 0.55), transparent 40%);
       pointer-events: none;
     }
     .portrait figcaption {
@@ -157,7 +169,7 @@
     h1 {
       font-family: var(--serif);
       font-weight: 500;
-      font-size: clamp(3rem, 7vw, 4.8rem);
+      font-size: clamp(2.8rem, 5.5vw, 4.4rem);
       line-height: 1;
       margin: 0 0 1.4rem;
       letter-spacing: -0.01em;
@@ -237,7 +249,7 @@
     .prose p {
       margin: 0;
       font-size: 1.05rem;
-      color: #d4d2cd;
+      color: #ddd4c4;
     }
 
     ol.works {
@@ -316,14 +328,25 @@
       font-size: 0.82rem;
       color: var(--faint);
     }
-    footer .bg-note {
-      max-width: 620px;
-      margin: 0 auto 1rem;
-      font-family: var(--serif);
-      font-style: italic;
-      font-size: 0.95rem;
-      color: var(--muted);
+    .bar { text-decoration: overline; }
+    .nowrap { white-space: nowrap; }
+    details.abstract { margin-top: 0.8rem; }
+    details.abstract summary {
+      cursor: pointer;
+      font-size: 0.85rem;
+      color: var(--accent);
+      list-style: none;
     }
+    details.abstract summary::-webkit-details-marker { display: none; }
+    details.abstract summary::before { content: "\25B8"; display: inline-block; margin-right: 0.4em; transition: transform 0.2s; }
+    details.abstract[open] summary::before { transform: rotate(90deg); }
+    details.abstract p {
+      margin: 0.7rem 0 0;
+      font-size: 0.93rem;
+      line-height: 1.6;
+      color: #cfc6b6;
+    }
+
     footer .qed {
       display: inline-block;
       width: 0.6em;
@@ -345,6 +368,14 @@
     }
 
     /* ---------- Responsive ---------- */
+    @media (max-width: 1100px) {
+      .hero { grid-template-columns: 260px minmax(0, 1fr); }
+      figure.building {
+        grid-column: 1 / -1;
+        justify-self: center;
+        width: 300px;
+      }
+    }
     @media (max-width: 820px) {
       .hero {
         grid-template-columns: 1fr;
@@ -353,6 +384,7 @@
         text-align: left;
       }
       figure.portrait { max-width: 300px; }
+      figure.building { justify-self: start; width: min(300px, 100%); }
       section {
         grid-template-columns: 1fr;
         gap: 1.4rem;
@@ -372,14 +404,13 @@
 </head>
 
 <body>
-  <canvas id="tree" aria-hidden="true"></canvas>
-
   <div class="page">
 
     <nav>
       <a class="mark" href="#">A<span>.</span>D</a>
       <ul>
         <li><a href="#research">Research</a></li>
+        <li><a href="#thesis">Thesis</a></li>
         <li><a href="#papers">Papers</a></li>
         <li><a href="#preprints">Preprints</a></li>
         <li><a href="#notes">Lecture notes</a></li>
@@ -413,7 +444,7 @@
             <span class="tag">Ph.D.</span>
             <span class="val">
               Harish-Chandra Research Institute
-              <small>Prayagraj, India</small>
+              <small>Prayagraj, India &middot; <span class="nowrap">January 2021 &ndash; October 2026</span></small>
             </span>
           </li>
         </ul>
@@ -424,6 +455,14 @@
           <span class="pill">Algebraic groups</span>
         </div>
       </div>
+
+      <figure class="building reveal">
+        <canvas id="tree" aria-label="Rotating star of a vertex in the Bruhat–Tits building of SL3(Q2)"></canvas>
+        <figcaption>
+          The star of a vertex in the Bruhat&ndash;Tits building of SL<sub>3</sub>(&#8474;<sub>2</sub>).
+          Its link is the Heawood graph; the highlighted hexagons lie in apartments.
+        </figcaption>
+      </figure>
     </header>
 
     <!-- ================= RESEARCH ================= -->
@@ -436,9 +475,52 @@
       </div>
     </section>
 
+    <!-- ================= THESIS ================= -->
+    <section id="thesis" class="reveal">
+      <h2><span class="num">02</span>Ph.D. thesis</h2>
+      <ol class="works">
+        <li class="work">
+          <a class="title" href="Thesis_final.pdf" target="_blank" rel="noopener">
+            Hecke actions and a restriction problem for mod-<i>p</i> representations of SL<sub>2</sub>(<i>F</i>)
+          </a>
+          <div class="meta">
+            Harish-Chandra Research Institute, Prayagraj &middot; Homi Bhabha National Institute
+            <br>January 2021 &ndash; October 2026 &middot; Advisor: Prof. R. Thangadurai
+          </div>
+          <details class="abstract">
+            <summary>Abstract</summary>
+            <p>
+              Let <i>F</i> be a non-archimedean local field of residue characteristic <i>p</i>, and let
+              <span class="bar">&#120125;</span><sub><i>p</i></sub> be a fixed algebraic closure of &#120125;<sub><i>p</i></sub>
+              containing the residue field <i>k<sub>F</sub></i> of <i>F</i>. Throughout this thesis we work with smooth
+              <span class="bar">&#120125;</span><sub><i>p</i></sub>-representations of SL<sub>2</sub>(<i>F</i>).
+            </p>
+            <p>
+              The thesis is built around two closely related problems in the mod-<i>p</i> representation theory of
+              SL<sub>2</sub>(<i>F</i>), both governed by compact inductions and by the action of Hecke operators on certain
+              invariant vectors. The first is Hecke-theoretic: we study the explicit action of spherical and Iwahori&ndash;Hecke
+              algebras on certain invariants of compactly induced representations and derive structural results about some
+              natural modules over these algebras. The second problem is representation-theoretic: here we consider the
+              restriction of irreducible smooth mod-<i>p</i> representations of SL<sub>2</sub>(<i>F</i>) to its Borel subgroup
+              and ask whether the Borel subgroup already controls irreducibility and intertwining.
+            </p>
+            <p>
+              These two problems are closely connected: the explicit Hecke computations in the first part provide the key
+              finiteness input needed in the supersingular case of the second. In particular, the finiteness results for
+              Hecke-submodules allow us to remove certain admissibility assumptions and thereby treat all irreducible smooth
+              mod-<i>p</i> representations in the restriction problem, rather than only the admissible ones.
+            </p>
+          </details>
+          <div class="links">
+            <a href="Thesis_final.pdf" target="_blank" rel="noopener">PDF</a>
+          </div>
+        </li>
+      </ol>
+    </section>
+
     <!-- ================= PUBLISHED ================= -->
     <section id="papers" class="reveal">
-      <h2><span class="num">02</span>Published papers</h2>
+      <h2><span class="num">03</span>Published papers</h2>
       <ol class="works">
         <li class="work">
           <a class="title" href="https://nyjm.albany.edu/j/2026/32-38v.pdf" target="_blank" rel="noopener">
@@ -454,7 +536,7 @@
 
     <!-- ================= PREPRINTS ================= -->
     <section id="preprints" class="reveal">
-      <h2><span class="num">03</span>Preprints</h2>
+      <h2><span class="num">04</span>Preprints</h2>
       <ol class="works">
         <li class="work">
           <a class="title" href="freeness_sl2.pdf" target="_blank" rel="noopener">
@@ -480,7 +562,7 @@
 
     <!-- ================= LECTURE NOTES ================= -->
     <section id="notes" class="reveal">
-      <h2><span class="num">04</span>Lecture notes</h2>
+      <h2><span class="num">05</span>Lecture notes</h2>
       <ol class="works">
         <li class="work">
           <a class="title" href="AGF.pdf" target="_blank" rel="noopener">Affine group functors</a>
@@ -516,11 +598,6 @@
   </div>
 
   <footer>
-    <p class="bg-note">
-      Background: the star of a vertex in the Bruhat&ndash;Tits building of SL<sub>3</sub>(&#8474;<sub>2</sub>).
-      Its link is the Heawood graph &mdash; the incidence graph of the Fano plane &#8473;<sup>2</sup>(&#120125;<sub>2</sub>) &mdash;
-      and each highlighted hexagon is the trace of an apartment.
-    </p>
     Project maintained by arpan-das-hri<span class="qed" title="∎"></span>
   </footer>
 
@@ -540,50 +617,82 @@
       els.forEach(function (e) { io.observe(e); });
     })();
 
-    /* Background: the star of a vertex in the Bruhat–Tits building of SL3(Q_2).
-       Vertices adjacent to the lattice class [L] are the subspaces of L/2L = F_2^3:
-       7 points (type 1) and 7 lines (type 2) of the Fano plane. Chambers containing [L]
-       are flags (point ⊂ line), so the link is the Heawood graph (21 edges).
-       Apartments through [L] are frames: 3 non-collinear points + the 3 lines joining them,
-       a hexagon in the link. One apartment at a time is highlighted. */
-    (function () {
-      var c = document.getElementById('tree');
-      var ctx = c.getContext('2d');
-      var W, H, dpr;
-
+    /* ------------------------------------------------------------------
+       The star of a vertex in the Bruhat–Tits building of SL3(Q_2).
+       Fix L = Z_2^3. Neighbours [M] of [L] (2L ⊊ M ⊊ L) <-> nonzero proper
+       subspaces of L/2L = F_2^3, i.e. the 7 points and 7 lines of the Fano plane.
+       Chambers at [L] <-> flags point ⊂ line (21 of them); the link is the
+       Heawood graph. Type of [M] = log_2 [L:M] mod 3: lines have type 1,
+       points type 2. Apartments through [L] meet the star in a hexagon given
+       by a frame {e1,e2,e3} of F_2^3: 168/3! = 28 hexagons in all.
+       ------------------------------------------------------------------ */
+    var Building = (function () {
       function dot(a, b) { var x = a & b; return ((x >> 2) ^ (x >> 1) ^ x) & 1; }
+      function key(a, b) { return a < b ? a + '-' + b : b + '-' + a; }
+      var i, j, k;
 
-      // vertex 0 = centre; 1..7 = points; 8..14 = lines
-      var type = [0], i, j, k;
-      for (i = 1; i <= 7; i++) type.push(1);
-      for (i = 1; i <= 7; i++) type.push(2);
+      // vertex 0 = [L]; 1..7 = points (vector p); 8..14 = lines (kernel of dual vector l)
+      var type = [0];
+      for (i = 1; i <= 7; i++) type.push(2);   // points: [L:M] = 4
+      for (i = 1; i <= 7; i++) type.push(1);   // lines:  [L:M] = 2
 
-      var link = [];
-      for (i = 1; i <= 7; i++) for (j = 1; j <= 7; j++) if (dot(i, j) === 0) link.push([i, 7 + j]);
-      var chambers = link.map(function (e) { return [0, e[0], e[1]]; });
+      var link = [], adj = {}, nbr = {};
+      for (i = 1; i <= 14; i++) nbr[i] = [];
+      for (i = 1; i <= 7; i++) for (j = 1; j <= 7; j++) if (dot(i, j) === 0) {
+        link.push([i, 7 + j]); adj[key(i, 7 + j)] = 1;
+        nbr[i].push(7 + j); nbr[7 + j].push(i);
+      }
 
       function lineThrough(a, b) {
         for (var l = 1; l <= 7; l++) if (!dot(a, l) && !dot(b, l)) return 7 + l;
       }
-      function key(a, b) { return a < b ? a + '-' + b : b + '-' + a; }
-
       var apartments = [];
       for (i = 1; i <= 7; i++) for (j = i + 1; j <= 7; j++) for (k = j + 1; k <= 7; k++) {
-        if ((i ^ j ^ k) === 0) continue;               // collinear
+        if ((i ^ j ^ k) === 0) continue;                      // collinear points
         var cyc = [i, lineThrough(i, j), j, lineThrough(j, k), k, lineThrough(k, i)];
-        var edges = {};
-        for (var m = 0; m < 6; m++) edges[key(cyc[m], cyc[(m + 1) % 6])] = 1;
-        apartments.push(edges);                        // 28 apartments through the vertex
+        var edges = {}, verts = {};
+        for (var m = 0; m < 6; m++) { edges[key(cyc[m], cyc[(m + 1) % 6])] = 1; verts[cyc[m]] = 1; }
+        apartments.push({ edges: edges, verts: verts });
       }
 
-      // Lay the 14 link vertices out on a sphere (springs along Heawood edges, mutual repulsion)
+      var PERIOD = 4500;
+      function current(t) {
+        var idx = Math.floor(t / PERIOD), ph = (t % PERIOD) / PERIOD;
+        return { ap: apartments[(idx * 11) % apartments.length],  // 11 is prime to 28: all 28 appear
+                 w: Math.min(1, Math.min(ph, 1 - ph) * 5) };
+      }
+
+      return { type: type, link: link, adj: adj, nbr: nbr, key: key, current: current,
+               colour: ['217,178,111', '127,179,213', '236,228,214'] };   // types 0, 1, 2
+    })();
+
+    function animateWhenVisible(canvas, draw) {
+      var visible = true;
+      function loop(t) { draw(t); if (visible) requestAnimationFrame(loop); }
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(function (en) {
+          var was = visible;
+          visible = en[0].isIntersecting;
+          if (visible && !was) requestAnimationFrame(loop);
+        }).observe(canvas);
+      }
+      requestAnimationFrame(loop);
+    }
+
+    /* ---------- Header: the star of [L], rotating in 3D ---------- */
+    (function () {
+      var B = Building, key = B.key;
+      var c = document.getElementById('tree');
+      var ctx = c.getContext('2d');
+      var W, H, dpr, i, j, k;
+      var chambers = B.link.map(function (e) { return [0, e[0], e[1]]; });
+
+      // place the 14 neighbours on a sphere (springs along link edges, mutual repulsion)
       var P = [[0, 0, 0]], n = 14;
       for (i = 0; i < n; i++) {
         var y = 1 - 2 * (i + 0.5) / n, r = Math.sqrt(1 - y * y), th = i * 2.399963;
         P.push([r * Math.cos(th), y, r * Math.sin(th)]);
       }
-      var adj = {};
-      link.forEach(function (e) { adj[key(e[0], e[1])] = 1; });
       for (var it = 0; it < 600; it++) {
         for (i = 1; i <= n; i++) {
           var f = [0, 0, 0];
@@ -591,7 +700,7 @@
             if (i === j) continue;
             var d = [P[i][0] - P[j][0], P[i][1] - P[j][1], P[i][2] - P[j][2]];
             var dd = Math.sqrt(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]) + 1e-6;
-            var s = 0.02 / (dd * dd * dd) - (adj[key(i, j)] ? 0.05 : 0);
+            var s = 0.02 / (dd * dd * dd) - (B.adj[key(i, j)] ? 0.05 : 0);
             f[0] += s * d[0]; f[1] += s * d[1]; f[2] += s * d[2];
           }
           for (k = 0; k < 3; k++) P[i][k] += f[k];
@@ -600,21 +709,20 @@
         }
       }
 
-      var colour = ['217,178,111', '127,179,213', '232,230,225'];   // vertex types 0, 1, 2
-
+      // the canvas is a square in the header's third column
       function resize() {
         dpr = Math.min(window.devicePixelRatio || 1, 2);
-        W = window.innerWidth; H = window.innerHeight;
+        W = H = c.clientWidth;
         c.width = W * dpr; c.height = H * dpr;
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       }
+      function geom() {            // projected radius never exceeds about 1.05 R
+        return { R: W * 0.44, cx: W / 2, cy: H / 2 };
+      }
 
-      var PERIOD = 4500;
       function draw(t) {
         ctx.clearRect(0, 0, W, H);
-        var narrow = W < 820;
-        var R = Math.min(W, H) * (narrow ? 0.30 : 0.26);
-        var cx = W * (narrow ? 0.72 : 0.84), cy = H * (narrow ? 0.18 : 0.34);
+        var g = geom(), R = g.R, cx = g.cx, cy = g.cy;
 
         var a = t * 0.00012, tilt = 0.45;
         var ca = Math.cos(a), sa = Math.sin(a), ct = Math.cos(tilt), st = Math.sin(tilt);
@@ -625,16 +733,12 @@
           return [cx + R * x * s, cy + R * y2 * s, z2];
         });
 
-        // current apartment and its fade weight
-        var idx = Math.floor(t / PERIOD), ph = (t % PERIOD) / PERIOD;
-        var ap = apartments[(idx * 11) % apartments.length];
-        var w = Math.min(1, Math.min(ph, 1 - ph) * 5);
+        var cur = B.current(t), ap = cur.ap.edges, w = cur.w;
 
         // chambers, back to front
-        var order = chambers.slice().sort(function (A, B) {
-          return (Q[B[1]][2] + Q[B[2]][2]) - (Q[A[1]][2] + Q[A[2]][2]);
-        });
-        order.forEach(function (ch) {
+        chambers.slice().sort(function (A, Bc) {
+          return (Q[Bc[1]][2] + Q[Bc[2]][2]) - (Q[A[1]][2] + Q[A[2]][2]);
+        }).forEach(function (ch) {
           var inAp = ap[key(ch[1], ch[2])];
           var depth = 0.6 + 0.4 * (1 - (Q[ch[1]][2] + Q[ch[2]][2] + 2) / 4);
           ctx.beginPath();
@@ -647,28 +751,18 @@
           ctx.stroke();
         });
 
-        // vertices, coloured by type
         for (i = 0; i <= n; i++) {
           var q = Q[i], al = 0.45 + 0.45 * (1 - (q[2] + 1) / 2);
-          ctx.fillStyle = 'rgba(' + colour[type[i]] + ',' + al + ')';
+          ctx.fillStyle = 'rgba(' + B.colour[B.type[i]] + ',' + al + ')';
           ctx.beginPath(); ctx.arc(q[0], q[1], i === 0 ? 3.5 : 2.6, 0, 6.283); ctx.fill();
         }
-        if (visible) requestAnimationFrame(draw);
-      }
-
-      var visible = true;
-      if ('IntersectionObserver' in window) {
-        new IntersectionObserver(function (en) {
-          var was = visible;
-          visible = en[0].isIntersecting;
-          if (visible && !was) requestAnimationFrame(draw);
-        }).observe(c);
       }
 
       resize();
       window.addEventListener('resize', resize);
-      requestAnimationFrame(draw);
+      animateWhenVisible(c, draw);
     })();
+
   </script>
 </body>
 </html>
