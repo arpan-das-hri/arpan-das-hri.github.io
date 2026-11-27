@@ -52,7 +52,7 @@
       height: 100%;
       z-index: 0;
       pointer-events: none;
-      opacity: 0.55;
+      opacity: 1;
     }
 
     .page {
@@ -532,7 +532,7 @@
       var ctx = c.getContext('2d');
       var P = 2;            // residue field F_p, so the tree is (p+1)-regular
       var DEPTH = 7;
-      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var reduce = false; // always rotate (very slowly)
       var edges = [], W, H, dpr;
 
       function build() {
@@ -562,16 +562,16 @@
 
       function draw(t) {
         ctx.clearRect(0, 0, W, H);
-        var R = Math.min(W, H) * 0.30;
+        var R = Math.min(W, H) * 0.34;
         var cx = W * 0.82, cy = H * 0.30;
-        var rot = reduce ? 0 : t * 0.00003;
+        var rot = t * 0.0001;   // one full turn ≈ 1 minute
         var cs = Math.cos(rot), sn = Math.sin(rot);
         ctx.lineCap = 'round';
         for (var i = 0; i < edges.length; i++) {
           var e = edges[i];
           var x1 = cx + R * (e[0] * cs - e[1] * sn), y1 = cy + R * (e[0] * sn + e[1] * cs);
           var x2 = cx + R * (e[2] * cs - e[3] * sn), y2 = cy + R * (e[2] * sn + e[3] * cs);
-          var alpha = 0.32 * Math.pow(0.78, e[4] - 1);
+          var alpha = 0.6 * Math.pow(0.85, e[4] - 1);
           ctx.strokeStyle = 'rgba(217,178,111,' + alpha + ')';
           ctx.lineWidth = Math.max(0.4, 1.4 * Math.pow(0.82, e[4] - 1));
           ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
